@@ -1,0 +1,85 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: "One row per unique customer. Includes derived segment flag and order history stats."
+    columns:
+      - name: customer_sk
+        description: "Surrogate key — hashed from customer_id"
+        tests:
+          - not_null
+          - unique
+      - name: customer_id
+        tests:
+          - not_null
+          - unique
+      - name: company_name
+        tests:
+          - not_null
+      - name: customer_segment
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['High Value', 'Mid Value', 'Low Value', 'Inactive']
+      - name: order_count
+        tests:
+          - not_null
+
+  - name: dim_products
+    description: "One row per product. Enriched with category name, supplier info, and sales stats."
+    columns:
+      - name: product_sk
+        description: "Surrogate key — hashed from product_id"
+        tests:
+          - not_null
+          - unique
+      - name: product_id
+        tests:
+          - not_null
+          - unique
+      - name: product_name
+        tests:
+          - not_null
+      - name: category_name
+        tests:
+          - not_null
+      - name: stock_status
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['In Stock', 'Low Stock', 'Out of Stock']
+
+  - name: dim_employees
+    description: "One row per employee. Includes manager name and lifetime sales stats."
+    columns:
+      - name: employee_sk
+        description: "Surrogate key — hashed from employee_id"
+        tests:
+          - not_null
+          - unique
+      - name: employee_id
+        tests:
+          - not_null
+          - unique
+      - name: full_name
+        tests:
+          - not_null
+      - name: title
+        tests:
+          - not_null
+
+  - name: dim_suppliers
+    description: "One row per supplier. Includes product count and revenue contribution."
+    columns:
+      - name: supplier_sk
+        description: "Surrogate key — hashed from supplier_id"
+        tests:
+          - not_null
+          - unique
+      - name: supplier_id
+        tests:
+          - not_null
+          - unique
+      - name: company_name
+        tests:
+          - not_null

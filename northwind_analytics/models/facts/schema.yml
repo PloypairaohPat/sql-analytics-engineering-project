@@ -1,0 +1,66 @@
+version: 2
+
+models:
+  - name: fct_orders
+    description: "Incremental fact table — one row per order. Includes revenue metrics, shipping status, and dimension foreign keys."
+    columns:
+      - name: order_sk
+        description: "Surrogate key — hashed from order_id"
+        tests:
+          - not_null
+          - unique
+      - name: order_id
+        tests:
+          - not_null
+          - unique
+      - name: customer_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_sk
+      - name: employee_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_employees')
+              field: employee_sk
+      - name: order_date
+        tests:
+          - not_null
+      - name: shipping_status
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['on_time', 'late', 'pending']
+      - name: net_revenue
+        tests:
+          - not_null
+
+  - name: fct_order_items
+    description: "Incremental fact table — one row per order line item. Grain: order_id + product_id."
+    columns:
+      - name: order_detail_sk
+        description: "Surrogate key — hashed from order_id + product_id"
+        tests:
+          - not_null
+          - unique
+      - name: order_id
+        tests:
+          - not_null
+      - name: product_id
+        tests:
+          - not_null
+      - name: order_sk
+        tests:
+          - relationships:
+              to: ref('fct_orders')
+              field: order_sk
+      - name: product_sk
+        tests:
+          - relationships:
+              to: ref('dim_products')
+              field: product_sk
+      - name: net_line_revenue
+        tests:
+          - not_null

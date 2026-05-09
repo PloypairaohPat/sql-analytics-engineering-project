@@ -1,0 +1,43 @@
+name: 'northwind_analytics'
+version: '1.0.0'
+
+profile: 'northwind_analytics'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  northwind_analytics:
+    staging:
+      +materialized: table
+    intermediate:
+      +materialized: table
+    dimensions:
+      +materialized: table
+    facts:
+      +materialized: incremental
+    reporting:
+      +materialized: table
+
+seeds:
+  northwind_analytics:
+    +schema: main
+    employees:
+      +column_types:
+        employeeID: integer
+        reportsTo: varchar
+        birthDate: varchar
+        hireDate: varchar
+    orders:
+      +column_types:
+        orderDate: varchar
+        requiredDate: varchar
+        shippedDate: varchar

@@ -1,0 +1,70 @@
+version: 2
+
+sources:
+  - name: northwind
+    description: "Northwind Traders raw data loaded via dbt seed"
+    schema: main_main
+
+    tables:
+      - name: orders
+        description: "Raw order header records — 830 orders"
+        columns:
+          - name: orderID
+            tests:
+              - not_null
+              - unique
+
+      - name: order_details
+        description: "Raw order line items — 2155 rows"
+        columns:
+          - name: orderID
+            tests:
+              - not_null
+
+      - name: customers
+        description: "Raw customer master records — 91 customers"
+        columns:
+          - name: customerID
+            tests:
+              - not_null
+              - unique
+
+      - name: products
+        description: "Raw product catalogue — 77 products"
+        columns:
+          - name: productID
+            tests:
+              - not_null
+              - unique
+
+      - name: employees
+        description: "Raw employee records — 9 employees"
+        columns:
+          - name: employeeID
+            tests:
+              - not_null
+              - unique
+
+      - name: suppliers
+        description: "Raw supplier records — 29 suppliers"
+        columns:
+          - name: supplierID
+            tests:
+              - not_null
+              - unique
+
+      - name: categories
+        description: "Product category lookup — 8 categories"
+        columns:
+          - name: categoryID
+            tests:
+              - not_null
+              - unique
+
+      - name: shippers
+        description: "Shipper lookup — 3 shippers"
+        columns:
+          - name: shipperID
+            tests:
+              - not_null
+              - unique

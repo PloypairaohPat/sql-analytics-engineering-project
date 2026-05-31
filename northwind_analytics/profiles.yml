@@ -1,7 +1,0 @@
-northwind_analytics:
-  target: dev
-  outputs:
-    dev:
-      type: duckdb
-      path: "C:/Users/kpaoi/Porfolio/SQL-Only Analytics Engineering Project/northwind_analytics/northwind.duckdb"
-      threads: 4

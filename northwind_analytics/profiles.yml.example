@@ -1,0 +1,8 @@
+northwind_analytics:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      # Relative path — works on any OS, points at the DB next to dbt_project.yml
+      path: "./northwind.duckdb"
+      threads: 4

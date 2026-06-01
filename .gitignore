@@ -1,0 +1,34 @@
+# ---- dbt ----
+target/
+dbt_packages/
+logs/
+.user.yml
+
+# ---- DuckDB ----
+*.duckdb
+*.duckdb.wal
+*.duckdb.tmp/
+
+# ---- Python / venv ----
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# ---- Secrets / local config ----
+.env
+.env.*
+profiles.yml
+
+# ---- IDE / editor ----
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ---- OS ----
+.DS_Store
+Thumbs.db

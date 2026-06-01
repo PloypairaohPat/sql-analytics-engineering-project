@@ -1,0 +1,114 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: "Cleaned order headers — one row per order. Types cast, surrogate key added, shipping status derived."
+    columns:
+      - name: order_sk
+        description: "Surrogate key — hash of order_id"
+        tests:
+          - not_null
+          - unique
+      - name: order_id
+        description: "Natural order key from source"
+        tests:
+          - not_null
+          - unique
+      - name: customer_id
+        tests:
+          - not_null
+      - name: employee_id
+        tests:
+          - not_null
+      - name: order_date
+        tests:
+          - not_null
+      - name: shipping_status
+        tests:
+          - accepted_values:
+              values: ['on_time', 'late', 'pending']
+
+  - name: stg_customers
+    description: "Cleaned customer records — one row per customer."
+    columns:
+      - name: customer_sk
+        description: "Surrogate key — hash of customer_id"
+        tests:
+          - not_null
+          - unique
+      - name: customer_id
+        tests:
+          - not_null
+          - unique
+      - name: company_name
+        tests:
+          - not_null
+      - name: country
+        tests:
+          - not_null
+
+  - name: stg_products
+    description: "Cleaned product catalogue — one row per product."
+    columns:
+      - name: product_sk
+        description: "Surrogate key — hash of product_id"
+        tests:
+          - not_null
+          - unique
+      - name: product_id
+        tests:
+          - not_null
+          - unique
+      - name: product_name
+        tests:
+          - not_null
+      - name: unit_price
+        tests:
+          - not_null
+
+  - name: stg_employees
+    description: "Cleaned employee records — one row per employee."
+    columns:
+      - name: employee_sk
+        description: "Surrogate key — hash of employee_id"
+        tests:
+          - not_null
+          - unique
+      - name: employee_id
+        tests:
+          - not_null
+          - unique
+      - name: full_name
+        tests:
+          - not_null
+
+  - name: stg_order_details
+    description: "Cleaned order line items — one row per order+product pair."
+    columns:
+      - name: order_detail_sk
+        description: "Surrogate key — hash of order_id + product_id"
+        tests:
+          - not_null
+          - unique
+      - name: order_id
+        tests:
+          - not_null
+      - name: product_id
+        tests:
+          - not_null
+
+  - name: stg_suppliers
+    description: "Cleaned supplier records — one row per supplier."
+    columns:
+      - name: supplier_sk
+        description: "Surrogate key — hash of supplier_id"
+        tests:
+          - not_null
+          - unique
+      - name: supplier_id
+        tests:
+          - not_null
+          - unique
+      - name: company_name
+        tests:
+          - not_null

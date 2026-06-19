@@ -7,7 +7,7 @@ with enriched as (
     select * from {{ ref('int_order_enriched') }}
     {% if is_incremental() %}
         where order_date >= (
-            select dateadd('day', -3, max(order_date))
+            select max(order_date) - interval 3 day
             from {{ this }}
         )
     {% endif %}

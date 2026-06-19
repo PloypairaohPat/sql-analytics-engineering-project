@@ -19,7 +19,7 @@ orders as (
     from {{ ref('fct_orders') }}
     {% if is_incremental() %}
         where order_date >= (
-            select dateadd('day', -3, max(o2.order_date))
+            select max(o2.order_date) - interval 3 day
             from {{ ref('fct_orders') }} o2
             join {{ this }} t on o2.order_sk = t.order_sk
         )

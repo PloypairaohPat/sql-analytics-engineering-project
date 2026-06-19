@@ -1,0 +1,88 @@
+version: 2
+
+models:
+  - name: rpt_monthly_revenue
+    description: "Monthly revenue by country with MoM change, cumulative totals, and rankings. Answers: How is revenue trending month over month?"
+    columns:
+      - name: revenue_month
+        tests:
+          - not_null
+      - name: ship_country
+        tests:
+          - not_null
+      - name: monthly_revenue
+        tests:
+          - not_null
+      - name: order_count
+        tests:
+          - not_null
+
+  - name: rpt_customer_ltv
+    description: "Customer lifetime value with LTV quartile buckets and global revenue rank. Answers: Who are the most valuable customers?"
+    columns:
+      - name: customer_sk
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_sk
+      - name: company_name
+        tests:
+          - not_null
+      - name: ltv_quartile
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4]
+      - name: revenue_rank
+        tests:
+          - not_null
+
+  - name: rpt_product_performance
+    description: "Product revenue, units sold, and rankings — global and within category. Answers: Which products and categories perform best?"
+    columns:
+      - name: product_sk
+        tests:
+          - not_null
+          - unique
+      - name: product_name
+        tests:
+          - not_null
+      - name: category_name
+        tests:
+          - not_null
+      - name: net_revenue
+        tests:
+          - not_null
+      - name: global_revenue_rank
+        tests:
+          - not_null
+
+  - name: rpt_employee_sales
+    description: "Employee sales performance with revenue rank, order count, and team share. Answers: Who are the top-performing sales reps?"
+    columns:
+      - name: employee_sk
+        tests:
+          - not_null
+          - unique
+      - name: full_name
+        tests:
+          - not_null
+      - name: revenue_rank
+        tests:
+          - not_null
+
+  - name: rpt_shipping_delays
+    description: "On-time delivery rate by country with freight costs and speed rankings. Answers: Which countries and shippers have the worst delivery performance?"
+    columns:
+      - name: ship_country
+        tests:
+          - not_null
+          - unique
+      - name: on_time_pct
+        tests:
+          - not_null
+      - name: total_orders
+        tests:
+          - not_null

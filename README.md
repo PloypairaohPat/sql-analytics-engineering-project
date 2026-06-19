@@ -266,9 +266,3 @@ dbt docs serve --profiles-dir northwind_analytics --project-dir northwind_analyt
 ```
 
 ---
-
-## Resume Bullets
-
-- Designed a 5-layer analytics engineering pipeline (raw seeds → staging → intermediate → dimensions/facts → reporting marts) using dbt Core and DuckDB, comprising 18 SQL models including 4 dimension tables, 2 incremental fact tables, and 5 pre-aggregated reporting models — no Python required across the entire pipeline.
-- Authored 127 automated schema tests (not_null, unique, relationships, accepted_values) achieving a **100% pass rate** across all 18 models, with every column and model documented via generated dbt docs and a published lineage DAG.
-- Demonstrated advanced SQL proficiency through multi-step CTE chains, window functions (RANK, NTILE, LAG, running totals), surrogate key generation via dbt_utils, QUALIFY deduplication, and incremental materialisation with late-arriving data handling.

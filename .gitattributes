@@ -1,0 +1,5 @@
+# Public Northwind sample data ? not authored code, exclude from language stats
+*.csv linguist-vendored
+
+# Documentation, not code
+*.md linguist-documentation

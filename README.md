@@ -23,10 +23,76 @@ RAW SEEDS → STAGING → INTERMEDIATE → DIMENSIONS + FACTS → REPORTING MART
 
 ---
 
+## Dimensional Model (Star Schema)
+
+Two fact tables at different grains — `fct_orders` (one row per order) and `fct_order_items` (one row per order line) — radiate out to four conformed dimensions.
+
+```mermaid
+erDiagram
+    dim_customers  ||--o{ fct_orders      : "customer_sk"
+    dim_employees  ||--o{ fct_orders      : "employee_sk"
+    fct_orders     ||--o{ fct_order_items : "order_sk"
+    dim_products   ||--o{ fct_order_items : "product_sk"
+    dim_customers  ||--o{ fct_order_items : "customer_sk"
+    dim_employees  ||--o{ fct_order_items : "employee_sk"
+    dim_suppliers  ||--o{ dim_products    : "supplier_id"
+
+    fct_orders {
+        varchar order_sk PK
+        varchar customer_sk FK
+        varchar employee_sk FK
+        date    order_date
+        varchar shipping_status
+        integer days_to_ship
+        numeric gross_revenue
+        numeric net_revenue
+    }
+    fct_order_items {
+        varchar order_detail_sk PK
+        varchar order_sk FK
+        varchar product_sk FK
+        varchar customer_sk FK
+        varchar employee_sk FK
+        integer quantity
+        numeric net_line_revenue
+    }
+    dim_customers {
+        varchar customer_sk PK
+        varchar customer_id
+        varchar company_name
+        varchar country
+        varchar customer_segment
+    }
+    dim_products {
+        varchar product_sk PK
+        varchar product_id
+        varchar product_name
+        varchar category_name
+        integer supplier_id FK
+        varchar stock_status
+    }
+    dim_employees {
+        varchar employee_sk PK
+        integer employee_id
+        varchar title
+    }
+    dim_suppliers {
+        varchar supplier_sk PK
+        integer supplier_id
+        varchar company_name
+        varchar country
+        integer product_count
+    }
+```
+
+*`fct_order_items` carries `customer_sk` and `employee_sk` through from the order grain so the line-item fact can be sliced by customer or employee without a fact-to-fact join. Suppliers attach to the products dimension on the natural key `supplier_id` — a small snowflake off `dim_products`, kept this way because supplier attributes are stable and low-cardinality. Categories are denormalised directly into `dim_products` rather than split into a separate dimension.*
+
+---
+
 ## Stack
 
 - **dbt Core 1.11** — SQL model orchestration, dependency resolution, testing, docs
-- **DuckDB 1.5** — zero-config in-process analytical database
+- **DuckDB 1.10** — zero-config in-process analytical database
 - **dbt_utils 1.3** — surrogate key generation (`generate_surrogate_key`)
 - **Northwind dataset** — 8 related CSV tables, 830 orders, 2,155 line items, 91 customers
 
@@ -65,7 +131,7 @@ Tests cover:
 
 ### Q1 — How is revenue trending month over month?
 
-April 1998 was the peak revenue month at **$123,799** across 74 orders. The business showed strong YoY growth — H1 1998 outpaced all of 1997. Month-over-month growth was consistently positive in early 1998, with February 1998 growing +5.8% over January.
+April 1998 was the peak revenue month at **$123,799** across 74 orders, capping a run of consistently positive month-over-month growth through early 1998 — February 1998 grew +5.8% over January.
 
 | Month | Revenue | Orders |
 |---|---|---|
@@ -77,7 +143,7 @@ April 1998 was the peak revenue month at **$123,799** across 74 orders. The busi
 
 ### Q2 — Who are the most valuable customers?
 
-The top quartile (Q1) customers account for a disproportionate share of revenue. The top 3 customers alone represent over **$319K** in lifetime value:
+The top quartile of customers accounts for a disproportionate share of revenue. The top 3 customers alone represent over **$319K** in lifetime value:
 
 | Customer | Country | LTV | Orders |
 |---|---|---|---|
@@ -174,9 +240,15 @@ northwind_analytics/
 ## Setup & Run
 
 ```bash
-# 1. Create Python 3.10 environment and install dbt
+# 1. Create a Python 3.10 virtual environment
 python3.10 -m venv .venv
-.venv/Scripts/pip install dbt-duckdb
+
+# Activate it:
+#   Windows (PowerShell):  .venv\Scripts\Activate.ps1
+#   macOS / Linux:         source .venv/bin/activate
+
+# Install dbt
+python -m pip install dbt-duckdb
 
 # 2. Install packages
 dbt deps --profiles-dir northwind_analytics --project-dir northwind_analytics
@@ -184,13 +256,11 @@ dbt deps --profiles-dir northwind_analytics --project-dir northwind_analytics
 # 3. Load seed data
 dbt seed --profiles-dir northwind_analytics --project-dir northwind_analytics
 
-# 4. Run all 18 models
-dbt run --profiles-dir northwind_analytics --project-dir northwind_analytics
+# 4. Build all 18 models and run all 127 tests
+#    (dbt build interleaves run + test in DAG order — what production teams do)
+dbt build --profiles-dir northwind_analytics --project-dir northwind_analytics
 
-# 5. Run 127 schema tests
-dbt test --profiles-dir northwind_analytics --project-dir northwind_analytics
-
-# 6. Generate docs
+# 5. Generate and serve docs
 dbt docs generate --profiles-dir northwind_analytics --project-dir northwind_analytics
 dbt docs serve --profiles-dir northwind_analytics --project-dir northwind_analytics
 ```

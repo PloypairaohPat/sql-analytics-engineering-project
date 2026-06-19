@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: int_order_enriched
+    description: "Intermediate join — one row per order with customer, employee, and aggregated order detail metrics. Used as the base for fact models."
+    columns:
+      - name: order_sk
+        description: "Surrogate key — hashed from order_id"
+        tests:
+          - not_null
+          - unique
+      - name: order_id
+        tests:
+          - not_null
+          - unique
+      - name: customer_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_sk
+      - name: net_revenue
+        tests:
+          - not_null

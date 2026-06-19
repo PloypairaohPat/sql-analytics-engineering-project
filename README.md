@@ -148,6 +148,8 @@ seeds (8 tables)
             └─ reporting (5 models)
 ```
 
+![dbt lineage DAG — full pipeline from raw seeds through staging, dimensions, and facts to reporting marts](docs/lineage_dag.png)
+
 ---
 
 ## Project Structure

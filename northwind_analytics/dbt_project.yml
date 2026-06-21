@@ -17,9 +17,9 @@ clean-targets:
 models:
   northwind_analytics:
     staging:
-      +materialized: table
+      +materialized: view
     intermediate:
-      +materialized: table
+      +materialized: view
     dimensions:
       +materialized: table
     facts:

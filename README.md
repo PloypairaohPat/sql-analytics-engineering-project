@@ -14,11 +14,11 @@ RAW SEEDS → STAGING → INTERMEDIATE → DIMENSIONS + FACTS → REPORTING MART
 
 | Layer | Models | Count | Materialisation |
 |---|---|---|---|
-| Staging | stg_orders, stg_customers, stg_products, stg_employees, stg_order_details, stg_suppliers | 6 | table |
+| Staging | stg_orders, stg_customers, stg_products, stg_employees, stg_order_details, stg_suppliers | 6 | view |
 | Dimensions | dim_customers, dim_products, dim_employees, dim_suppliers | 4 | table |
 | Facts | fct_orders, fct_order_items | 2 | incremental |
 | Reporting | rpt_monthly_revenue, rpt_customer_ltv, rpt_product_performance, rpt_employee_sales, rpt_shipping_delays | 5 | table |
-| Intermediate | int_order_enriched | 1 | table |
+| Intermediate | int_order_enriched | 1 | view |
 | **Total** | | **18** | |
 
 ---

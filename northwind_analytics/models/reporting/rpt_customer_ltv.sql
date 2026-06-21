@@ -15,20 +15,17 @@ customer_aggregates as (
         c.company_name,
         c.country,
         c.customer_segment,
-        c.order_count,
-        c.first_order_date,
-        c.last_order_date,
         c.customer_tenure_days,
 
         sum(f.net_revenue)          as lifetime_value,
         count(distinct f.order_sk)  as total_orders,
         avg(f.net_revenue)          as avg_order_value,
-        min(f.order_date)           as first_order,
-        max(f.order_date)           as last_order
+        min(f.order_date)           as first_order_date,
+        max(f.order_date)           as last_order_date
 
     from {{ ref('dim_customers') }} c
     left join order_revenue f on c.customer_sk = f.customer_sk
-    group by 1, 2, 3, 4, 5, 6, 7, 8
+    group by 1, 2, 3, 4, 5
 ),
 
 with_rankings as (

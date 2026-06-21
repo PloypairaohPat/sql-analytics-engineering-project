@@ -34,6 +34,8 @@ from northwind.rpt_monthly_revenue
   <BigValue data={peak} value=revenue_month title="Peak Month" />
 </Grid>
 
+> **Note:** the final month shown is partial (data ends mid-May 1998) — the apparent drop is a data cutoff artifact, not a real revenue decline.
+
 <LineChart
     data={monthly_revenue}
     x=revenue_month

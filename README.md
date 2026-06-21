@@ -2,7 +2,9 @@
 
 **dbt Core · DuckDB · Star Schema · Automated Testing**
 
-A complete analytics engineering pipeline built with only SQL and dbt — 18 models across 5 architectural layers, 127 automated schema tests, and a published lineage DAG.
+### 🔗 [**Live Dashboard**](https://northwind-analytics-pat.netlify.app) &nbsp;·&nbsp; [Source on GitHub](https://github.com/PloypairaohPat/sql-analytics-engineering-project)
+
+A complete analytics engineering pipeline built with only SQL and dbt — 18 models across 5 architectural layers, 127 automated schema tests, and a published lineage DAG. The [live Evidence.dev dashboard](https://northwind-analytics-pat.netlify.app) answers 3 of the 5 business questions below, built from the same SQL models — no Python anywhere in the stack.
 
 ---
 

@@ -8,6 +8,8 @@ logs/
 *.duckdb
 *.duckdb.wal
 *.duckdb.tmp/
+# Dashboard deploy DB is a committed build artifact — override the wildcard above
+!dashboard/northwind_reporting.duckdb
 
 # ---- Python / venv ----
 .venv/

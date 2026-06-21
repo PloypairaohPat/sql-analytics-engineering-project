@@ -1,0 +1,4 @@
+name: northwind
+type: duckdb
+options:
+  filename: ../../northwind_reporting.duckdb

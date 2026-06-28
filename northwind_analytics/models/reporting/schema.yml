@@ -86,3 +86,27 @@ models:
       - name: total_orders
         tests:
           - not_null
+
+  - name: rpt_shipper_performance
+    description: "On-time delivery rate and delay ranking per shipping carrier. Answers: Which shipper has the most delays?"
+    columns:
+      - name: shipper_id
+        description: "Numeric identifier for the shipping carrier."
+        tests:
+          - not_null
+      - name: shipper_name
+        description: "Company name of the shipping carrier."
+      - name: total_orders
+        description: "Total number of orders handled by this shipper."
+      - name: on_time_orders
+        description: "Count of orders delivered on or before the required date."
+      - name: late_orders
+        description: "Count of orders delivered after the required date."
+      - name: on_time_pct
+        description: "Percentage of orders delivered on time (0–100)."
+      - name: avg_days_to_ship
+        description: "Average days from order date to ship date for this shipper."
+      - name: worst_on_time_rank
+        description: "Rank by ascending on-time percentage; rank 1 = worst-performing shipper."
+        tests:
+          - not_null

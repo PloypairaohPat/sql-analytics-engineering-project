@@ -57,10 +57,10 @@ final as (
         oa.net_revenue,
         oa.avg_discount_rate
 
-    from orders o
-    left join customers c on o.customer_id = c.customer_id
-    left join employees e on o.employee_id = e.employee_id
-    left join order_aggregates oa on o.order_id = oa.order_id
+    from orders as o
+    left join customers as c on o.customer_id = c.customer_id
+    left join employees as e on o.employee_id = e.employee_id
+    left join order_aggregates as oa on o.order_id = oa.order_id
 )
 
 select * from final

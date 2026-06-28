@@ -20,8 +20,8 @@ orders as (
     {% if is_incremental() %}
         where order_date >= (
             select max(o2.order_date) - interval 3 day
-            from {{ ref('fct_orders') }} o2
-            join {{ this }} t on o2.order_sk = t.order_sk
+            from {{ ref('fct_orders') }} as o2
+            inner join {{ this }} as t on o2.order_sk = t.order_sk
         )
     {% endif %}
 ),
@@ -63,9 +63,9 @@ final as (
         od.line_discount_amount,
         od.net_line_revenue
 
-    from order_details od
-    left join orders o on od.order_id = o.order_id
-    left join products p on od.product_id = p.product_id
+    from order_details as od
+    left join orders as o on od.order_id = o.order_id
+    left join products as p on od.product_id = p.product_id
 )
 
 select * from final

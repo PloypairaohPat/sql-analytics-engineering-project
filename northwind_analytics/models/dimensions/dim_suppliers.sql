@@ -11,8 +11,8 @@ product_stats as (
         count(distinct p.category_id)       as category_count,
         sum(od.net_line_revenue)            as total_revenue_supplied,
         sum(od.quantity)                    as total_units_supplied
-    from {{ ref('stg_products') }} p
-    join {{ ref('stg_order_details') }} od on p.product_id = od.product_id
+    from {{ ref('stg_products') }} as p
+    inner join {{ ref('stg_order_details') }} as od on p.product_id = od.product_id
     group by p.supplier_id
 ),
 
@@ -33,8 +33,8 @@ final as (
         coalesce(ps.total_revenue_supplied, 0)  as total_revenue_supplied,
         coalesce(ps.total_units_supplied, 0)    as total_units_supplied
 
-    from suppliers s
-    left join product_stats ps on s.supplier_id = ps.supplier_id
+    from suppliers as s
+    left join product_stats as ps on s.supplier_id = ps.supplier_id
 )
 
 select * from final

@@ -40,8 +40,8 @@ final as (
             else 'Inactive'
         end                                     as customer_segment
 
-    from customers c
-    left join order_stats o on c.customer_id = o.customer_id
+    from customers as c
+    left join order_stats as o on c.customer_id = o.customer_id
 )
 
 select * from final

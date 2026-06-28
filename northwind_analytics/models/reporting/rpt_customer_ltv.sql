@@ -23,8 +23,8 @@ customer_aggregates as (
         min(f.order_date)           as first_order_date,
         max(f.order_date)           as last_order_date
 
-    from {{ ref('dim_customers') }} c
-    left join order_revenue f on c.customer_sk = f.customer_sk
+    from {{ ref('dim_customers') }} as c
+    left join order_revenue as f on c.customer_sk = f.customer_sk
     group by 1, 2, 3, 4, 5
 ),
 

@@ -19,8 +19,8 @@ sales_stats as (
         count(distinct o.customer_id)   as unique_customers,
         min(o.order_date)               as first_sale_date,
         max(o.order_date)               as last_sale_date
-    from {{ ref('stg_orders') }} o
-    join {{ ref('stg_order_details') }} od on o.order_id = od.order_id
+    from {{ ref('stg_orders') }} as o
+    inner join {{ ref('stg_order_details') }} as od on o.order_id = od.order_id
     group by o.employee_id
 ),
 
@@ -46,9 +46,9 @@ final as (
         ss.first_sale_date,
         ss.last_sale_date
 
-    from employees e
-    left join managers m on e.reports_to_employee_id = m.employee_id
-    left join sales_stats ss on e.employee_id = ss.employee_id
+    from employees as e
+    left join managers as m on e.reports_to_employee_id = m.employee_id
+    left join sales_stats as ss on e.employee_id = ss.employee_id
 )
 
 select * from final

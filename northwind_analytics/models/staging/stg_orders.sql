@@ -32,7 +32,6 @@ renamed as (
         case
             when try_cast(shippedDate as date) is not null and try_cast(orderDate as date) is not null
             then datediff('day', try_cast(orderDate as date), try_cast(shippedDate as date))
-            else null
         end                                                     as days_to_ship
 
     from source

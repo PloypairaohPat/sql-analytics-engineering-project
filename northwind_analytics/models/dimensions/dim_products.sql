@@ -27,7 +27,7 @@ sales_stats as (
         sum(od.net_line_revenue)        as total_revenue,
         count(distinct od.order_id)     as order_count,
         avg(od.unit_price)              as avg_selling_price
-    from {{ ref('stg_order_details') }} od
+    from {{ ref('stg_order_details') }} as od
     group by od.product_id
 ),
 
@@ -62,10 +62,10 @@ final as (
             else 'In Stock'
         end                                 as stock_status
 
-    from products p
-    left join categories c on p.category_id = c.category_id
-    left join suppliers s on p.supplier_id = s.supplier_id
-    left join sales_stats ss on p.product_id = ss.product_id
+    from products as p
+    left join categories as c on p.category_id = c.category_id
+    left join suppliers as s on p.supplier_id = s.supplier_id
+    left join sales_stats as ss on p.product_id = ss.product_id
 )
 
 select * from final

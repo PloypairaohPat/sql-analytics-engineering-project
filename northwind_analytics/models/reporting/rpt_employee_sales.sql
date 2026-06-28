@@ -35,8 +35,8 @@ employee_aggregates as (
             2
         )                                                               as late_order_pct
 
-    from {{ ref('dim_employees') }} e
-    left join order_data f on e.employee_sk = f.employee_sk
+    from {{ ref('dim_employees') }} as e
+    left join order_data as f on e.employee_sk = f.employee_sk
     group by 1, 2, 3, 4, 5, 6, 7
 ),
 

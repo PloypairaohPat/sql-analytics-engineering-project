@@ -2,9 +2,11 @@
 
 **dbt Core · DuckDB · Star Schema · Automated Testing**
 
+[![dbt CI](https://github.com/PloypairaohPat/sql-analytics-engineering-project/actions/workflows/dbt-ci.yml/badge.svg)](https://github.com/PloypairaohPat/sql-analytics-engineering-project/actions/workflows/dbt-ci.yml)
+
 ### 🔗 [**Live Dashboard**](https://northwind-analytics-pat.netlify.app) &nbsp;·&nbsp; [Source on GitHub](https://github.com/PloypairaohPat/sql-analytics-engineering-project)
 
-A complete analytics engineering pipeline built with only SQL and dbt — 18 models across 5 architectural layers, 127 automated schema tests, and a published lineage DAG. The [live Evidence.dev dashboard](https://northwind-analytics-pat.netlify.app) answers 3 of the 5 business questions below, built from the same SQL models — no Python anywhere in the stack.
+A complete analytics engineering pipeline built with only SQL and dbt — 19 models across 5 architectural layers, 132 automated tests (schema + custom), and a published lineage DAG. The [live Evidence.dev dashboard](https://northwind-analytics-pat.netlify.app) answers 3 of the 5 business questions below, built from the same SQL models — no Python anywhere in the stack.
 
 ---
 
@@ -19,9 +21,9 @@ RAW SEEDS → STAGING → INTERMEDIATE → DIMENSIONS + FACTS → REPORTING MART
 | Staging | stg_orders, stg_customers, stg_products, stg_employees, stg_order_details, stg_suppliers | 6 | view |
 | Dimensions | dim_customers, dim_products, dim_employees, dim_suppliers | 4 | table |
 | Facts | fct_orders, fct_order_items | 2 | incremental |
-| Reporting | rpt_monthly_revenue, rpt_customer_ltv, rpt_product_performance, rpt_employee_sales, rpt_shipping_delays | 5 | table |
+| Reporting | rpt_monthly_revenue, rpt_customer_ltv, rpt_product_performance, rpt_employee_sales, rpt_shipping_delays, rpt_shipper_performance | 6 | table |
 | Intermediate | int_order_enriched | 1 | view |
-| **Total** | | **18** | |
+| **Total** | | **19** | |
 
 ---
 
@@ -91,6 +93,18 @@ erDiagram
 
 ---
 
+## Design Decisions
+
+**Surrogate keys over natural keys.** Every staging model generates a surrogate key by hashing the natural key with `dbt_utils.generate_surrogate_key()`. Natural keys from source systems are unreliable — they get reused, renumbered, or arrive null. A hashed surrogate is deterministic and stable, so downstream joins stay valid even if a source system renumbers its IDs, and the same input always produces the same key across runs. Generating them in staging means every dimension and fact inherits stable keys without re-deriving them.
+
+**Incremental facts with a 3-day lookback.** The fact tables are materialised incrementally, so each run processes only new or changed rows instead of rebuilding full history — the distinction that matters once a fact grows past a few million rows. The incremental filter doesn't use a strict `order_date > max(order_date)`; it subtracts a 3-day window first. That lookback catches late-arriving records that a strict greater-than would silently skip — the kind of quiet data-loss bug that stays invisible until someone reconciles totals months later.
+
+**Star schema over one wide table.** The model centres on two fact tables joined to four conformed dimensions rather than flattening everything into one wide table. Dimensions are reusable — `dim_customers` serves the LTV, employee-sales, and monthly-revenue marts without redefinition. Each table's grain is explicit and joins are predictable, which keeps the SQL easy to reason about and storage smaller, since a fact row holds keys rather than repeated descriptive text. It also maps to how stakeholders think: "revenue by customer by month" is one fact sliced by two dimensions.
+
+**DuckDB as the warehouse.** DuckDB runs in-process with zero setup — no server, no credentials, no cloud account — so the whole pipeline clones and runs anywhere after a single `pip install`. For a portfolio that's the point: a reviewer reproduces it in minutes. Its SQL dialect is close enough to BigQuery and Snowflake that the models port with minimal changes, so the patterns here are the ones I'd use on a cloud warehouse — only the adapter and materialisation tuning would differ.
+
+---
+
 ## Stack
 
 - **dbt Core 1.11** — SQL model orchestration, dependency resolution, testing, docs
@@ -105,7 +119,7 @@ erDiagram
 | Technique | Where Used |
 |---|---|
 | `ROW_NUMBER() QUALIFY` deduplication | All staging models |
-| `RANK() OVER(...)` | rpt_product_performance, rpt_employee_sales, rpt_customer_ltv |
+| `RANK() OVER(...)` | rpt_product_performance, rpt_employee_sales, rpt_customer_ltv, rpt_shipper_performance |
 | `NTILE(4) OVER(...)` quartile segmentation | rpt_customer_ltv |
 | `LAG()` month-over-month comparison | rpt_monthly_revenue |
 | `SUM() OVER (ORDER BY ...)` running totals | rpt_monthly_revenue, rpt_customer_ltv |
@@ -119,13 +133,18 @@ erDiagram
 ## Test Results
 
 ```
-dbt test: 127 passed, 0 warnings, 0 errors
+dbt build: 132 tests passed, 0 warnings, 0 errors
 ```
 
-Tests cover:
+**Schema tests** (declared in `schema.yml` across every layer):
 - `not_null` + `unique` on every primary key
 - `relationships` on every foreign key
 - `accepted_values` on every status/enum column
+
+**Custom singular tests** (`tests/` — business invariants beyond key integrity):
+- `assert_positive_net_revenue` — no order line resolves to negative net revenue
+- `assert_customer_segment_coverage` — every customer is assigned a segment (no nulls)
+- `assert_no_orders_before_employee_hire` — no order predates the handling employee's hire date (temporal referential integrity)
 
 ---
 
@@ -181,7 +200,7 @@ Margaret Peacock leads both by total revenue (**$232,891**) and order count (156
 
 ### Q5 — Which countries and shippers have the worst delivery performance?
 
-Argentina has the worst on-time rate at **81.25%** though with a small sample. Ireland (84.2%) and Venezuela (89.1%) are the next worst. Average days to ship ranges from 7.9 to 11.0 for the worst performers.
+By country, Argentina has the worst on-time rate at **81.25%**, though on a small sample; Ireland (84.2%) and Venezuela (89.1%) follow. By shipper, **United Package** has the lowest on-time rate at **91.72%** — it also handles the most volume (326 orders) and the most late orders (16), while Federal Shipping leads on reliability at 94.12%.
 
 | Country | On-Time % | Late Orders | Avg Days to Ship |
 |---|---|---|---|
@@ -190,6 +209,12 @@ Argentina has the worst on-time rate at **81.25%** though with a small sample. I
 | Venezuela | 89.13% | 2 | 8.5 |
 | Italy | 89.29% | 2 | 7.9 |
 | USA | 91.80% | 7 | 9.6 |
+
+| Shipper | On-Time % | Total Orders | Late Orders |
+|---|---|---|---|
+| United Package | 91.72% | 326 | 16 |
+| Speedy Express | 93.57% | 249 | 12 |
+| Federal Shipping | 94.12% | 255 | 9 |
 
 ---
 
@@ -213,7 +238,7 @@ seeds (8 tables)
             ├─ dimensions (4 models)
             ├─ facts/fct_orders (incremental)
             │    └─ facts/fct_order_items (incremental)
-            └─ reporting (5 models)
+            └─ reporting (6 models)
 ```
 
 ![dbt lineage DAG — full pipeline from raw seeds through staging, dimensions, and facts to reporting marts](docs/lineage_dag.png)
@@ -234,6 +259,7 @@ northwind_analytics/
 │   ├── dimensions/          # dim_* models + schema.yml
 │   ├── facts/               # fct_* models (incremental) + schema.yml
 │   └── reporting/           # rpt_* models + schema.yml
+├── tests/                   # Custom singular data tests
 └── macros/
 ```
 
@@ -258,7 +284,7 @@ dbt deps --profiles-dir northwind_analytics --project-dir northwind_analytics
 # 3. Load seed data
 dbt seed --profiles-dir northwind_analytics --project-dir northwind_analytics
 
-# 4. Build all 18 models and run all 127 tests
+# 4. Build all 19 models and run all 132 tests
 #    (dbt build interleaves run + test in DAG order — what production teams do)
 dbt build --profiles-dir northwind_analytics --project-dir northwind_analytics
 

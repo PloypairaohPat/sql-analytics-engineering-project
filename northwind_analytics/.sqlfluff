@@ -1,0 +1,27 @@
+[sqlfluff]
+templater = dbt
+dialect = duckdb
+# Lenient curated ruleset — focus on consistency, exclude noisy/opinionated rules
+exclude_rules = structure.column_order, references.consistent, references.qualification, ambiguous.column_references, structure.using, aliasing.unused, layout.spacing, capitalisation.identifiers, layout.select_targets, layout.indent
+
+max_line_length = 120
+
+[sqlfluff:indentation]
+indent_unit = space
+tab_space_size = 4
+
+[sqlfluff:rules:capitalisation.keywords]
+capitalisation_policy = lower
+
+[sqlfluff:rules:capitalisation.identifiers]
+extended_capitalisation_policy = lower
+
+[sqlfluff:rules:capitalisation.functions]
+extended_capitalisation_policy = lower
+
+[sqlfluff:rules:convention.select_trailing_comma]
+select_clause_trailing_comma = forbid
+
+[sqlfluff:templater:dbt]
+project_dir = .
+profiles_dir = .

@@ -1,0 +1,84 @@
+name: dbt CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+defaults:
+  run:
+    working-directory: northwind_analytics
+
+jobs:
+  dbt-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - uses: actions/cache@v4
+        with:
+          path: northwind_analytics/dbt_packages
+          key: dbt-packages-${{ hashFiles('northwind_analytics/packages.yml') }}
+          restore-keys: |
+            dbt-packages-
+
+      - name: Install dbt
+        run: pip install dbt-core==1.11.11 dbt-duckdb==1.10.1
+
+      - name: Generate CI profiles.yml
+        run: |
+          cat > profiles.yml <<'EOF'
+          northwind_analytics:
+            target: ci
+            outputs:
+              ci:
+                type: duckdb
+                path: northwind.duckdb
+                threads: 4
+          EOF
+
+      - name: Install dbt packages
+        run: dbt deps --profiles-dir . --project-dir .
+
+      - name: Load seed data
+        run: dbt seed --profiles-dir . --project-dir .
+
+      - name: Build and test
+        run: dbt build --profiles-dir . --project-dir .
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dbt and sqlfluff
+        run: pip install dbt-core==1.11.11 dbt-duckdb==1.10.1 sqlfluff sqlfluff-templater-dbt
+
+      - name: Generate CI profiles.yml
+        run: |
+          cat > profiles.yml <<'EOF'
+          northwind_analytics:
+            target: ci
+            outputs:
+              ci:
+                type: duckdb
+                path: northwind.duckdb
+                threads: 4
+          EOF
+
+      - name: Install dbt packages
+        run: dbt deps --profiles-dir . --project-dir .
+
+      - name: Lint SQL
+        run: sqlfluff lint models/
